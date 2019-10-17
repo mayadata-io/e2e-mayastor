@@ -41,11 +41,11 @@ fio-deploy:
    - echo "Deploying fio using MayaStor"
 ## Define the app deployer jobs
 
-cleanup-packet:
+cluster-cleanup:
   when: always
   image: openebs/openshift-ci:latest
   dependencies:
-    - packet-cluster
+    - cluster-setup
   stage: CLUSTER-CLEANUP
   script: 
     - echo "Reverting cluster to healthy state"
