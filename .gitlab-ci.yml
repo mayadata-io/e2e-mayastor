@@ -1,0 +1,51 @@
+## TODO: Modularize the gitlab yaml to reuse templates
+
+## Define the stages & order of execution
+
+stages:
+  - CLUSTER-SETUP
+  - PROVIDER-INFRA-SETUP
+  - APP-FUNC-TEST
+  # - APP-CHAOS-TEST
+  - CLUSTER-CLEANUP
+
+# Setup the kubernetes cluster
+
+cluster-setup:
+  image: openebs/openshift-ci:latest
+  stage: CLUSTER-SETUP 
+  script:
+    - echo "Infra-setup"
+
+## Setup OpenEBS control plane
+
+mayastor-deploy:
+  image: openebs/openshift-ci:latest
+  stage: PROVIDER-INFRA-SETUP
+  dependencies:
+    - cluster-setup
+  script: 
+   - echo "Deploying MayaStor"
+
+## Define a job template for app deployers
+
+.app_deploy_template:
+  image: openebs/openshift-ci:latest
+  stage: APP-FUNC-TEST
+  dependencies:
+    - cluster-setup
+
+fio-deploy:
+  extends: .app_deploy_template
+  script: 
+   - echo "Deploying fio using MayaStor"
+## Define the app deployer jobs
+
+cleanup-packet:
+  when: always
+  image: openebs/openshift-ci:latest
+  dependencies:
+    - packet-cluster
+  stage: CLUSTER-CLEANUP
+  script: 
+    - echo "Reverting cluster to healthy state"
