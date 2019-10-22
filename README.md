@@ -1,2 +1,2 @@
 # e2e-mayastor
-e2e scripts to validate MayaStor through gitlab pipeline
+Gitlab runner scripts to execute Litmus experiments specific to the storage engine Mayastor.
