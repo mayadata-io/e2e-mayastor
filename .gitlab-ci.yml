@@ -48,9 +48,9 @@ fio-deploy:
 cluster-cleanup:
   when: always
   image: ranjnshashank855/gke:v1
+  stage: CLUSTER-CLEANUP
   dependencies:
     - cluster-setup
-  stage: CLUSTER-CLEANUP
   script: 
     - chmod 775 ./pipelines/5-cluster-cleanup/cluster-cleanup
     - ./pipelines/5-cluster-cleanup/cluster-cleanup
