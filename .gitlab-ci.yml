@@ -50,5 +50,5 @@ cluster-cleanup:
   image: ranjnshashank855/gke:v1
   stage: CLUSTER-CLEANUP
   script: 
-    - chmod 775 ./pipelines/5-cluster-cleanup/cluster-cleanup
-    - ./pipelines/5-cluster-cleanup/cluster-cleanup
+    - chmod 775 ./pipelines/5-cleanup/cluster-cleanup
+    - ./pipelines/5-cleanup/cluster-cleanup

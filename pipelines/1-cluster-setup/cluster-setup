@@ -25,13 +25,13 @@ echo "creating cluster"
 ansible-playbook create-gke-cluster.yml -vv
 
 
-mkdir /openebs/e2e-mayastor/.kube
-cat ~/.kube/config > /openebs/e2e-mayastor/.kube/config
-cat ~/.kube/config > /openebs/e2e-mayastor/.kube/admin.conf
-cat ~/logs/clusters > /openebs/e2e-mayastor/.kube/clusters
-cat ~/logs/zone > /openebs/e2e-mayastor/.kube/zone
+mkdir $present_dir/.kube
+cat ~/.kube/config > $present_dir/.kube/config
+cat ~/.kube/config > $present_dir/.kube/admin.conf
+cat ~/logs/clusters > $present_dir/.kube/clusters
+cat ~/logs/zone > $present_dir/.kube/zone
 
 kubectl get nodes
 kubectl apply -f $present_dir/litmus/hack/rbac.yaml
 kubectl apply -f $present_dir/litmus/hack/crds.yaml
-kubectl create configmap kubeconfig --from-file=/openebs/e2e-mayastor/.kube/admin.conf -n litmus
+kubectl create configmap kubeconfig --from-file=$present_dir/.kube/admin.conf -n litmus
