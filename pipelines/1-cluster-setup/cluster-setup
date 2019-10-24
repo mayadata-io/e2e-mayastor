@@ -4,16 +4,21 @@ set -e
 present_dir=$(pwd)
 echo $present_dir
 
-echo $SDK_TOKEN > key.json
-gcloud auth activate-service-account --key-file=key.json
-gcloud config set project openebs-ci
-export GOOGLE_APPLICATION_CREDENTIALS="/openebs/e2e-mayastor/key.json"
-export GCP_SERVICE_ACCOUNT_FILE="/openebs/e2e-mayastor/key.json"
-export GKEUSER=`echo $GKE_USER`
-
 git clone https://github.com/mayadata-io/litmus.git
 
 cd litmus/k8s/gke/k8s-installer
+
+echo $SDK_TOKEN > key.json
+
+gcloud auth activate-service-account --key-file=./key.json
+gcloud config set project openebs-ci
+export GOOGLE_APPLICATION_CREDENTIALS="./key.json"
+export GCP_SERVICE_ACCOUNT_FILE="./key.json"
+export GKEUSER=`echo $GKE_USER`
+
+ls
+
+sed -i -e 's/no_log: True/ /g' create-gke-cluster.yml
 
 echo "creating cluster"
 
