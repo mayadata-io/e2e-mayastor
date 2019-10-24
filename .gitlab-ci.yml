@@ -12,10 +12,14 @@ stages:
 # Setup the kubernetes cluster
 
 cluster-setup:
-  image: openebs/openshift-ci:latest
+  image: ranjnshashank855/gke:v1
   stage: CLUSTER-SETUP 
   script:
-    - echo "Infra-setup"
+    - chmod 775 ./pipelines/1-cluster-setup/cluster-setup
+    - ./pipelines/1-cluster-setup/cluster-setup
+  artifacts:
+    paths:
+      - .kube/
 
 ## Setup OpenEBS control plane
 
@@ -43,9 +47,10 @@ fio-deploy:
 
 cluster-cleanup:
   when: always
-  image: openebs/openshift-ci:latest
+  image: ranjnshashank855/gke:v1
   dependencies:
     - cluster-setup
   stage: CLUSTER-CLEANUP
   script: 
-    - echo "Reverting cluster to healthy state"
+    - chmod 775 ./pipelines/5-cluster-cleanup/cluster-cleanup
+    - ./pipelines/5-cluster-cleanup/cluster-cleanup

@@ -1,0 +1,31 @@
+#!/bin/bash
+set -e
+
+present_dir=$(pwd)
+
+echo $SDK_TOKEN > key.json
+gcloud auth activate-service-account --key-file=key.json
+gcloud config set project openebs-ci
+export GOOGLE_APPLICATION_CREDENTIALS="/openebs/e2e-mayastor/key.json"
+export GCP_SERVICE_ACCOUNT_FILE="/openebs/e2e-mayastor/key.json"
+export GKEUSER=`echo $GKE_USER`
+
+git clone https://github.com/mayadata-io/litmus.git
+
+cd litmus/k8s/gke/k8s-installer
+
+echo "creating cluster"
+
+ansible-playbook create-gke-cluster.yml -vv
+
+
+mkdir /openebs/e2e-mayastor/.kube
+cat ~/.kube/config > /openebs/e2e-mayastor/.kube/config
+cat ~/.kube/config > /openebs/e2e-mayastor/.kube/admin.conf
+cat ~/logs/clusters > /openebs/e2e-mayastor/.kube/clusters
+cat ~/logs/zone > /openebs/e2e-mayastor/.kube/zone
+
+kubectl get nodes
+kubectl apply -f $present_dir/litmus/hack/rbac.yaml
+kubectl apply -f $present_dir/litmus/hack/crds.yaml
+kubectl create configmap kubeconfig --from-file=/openebs/e2e-mayastor/.kube/admin.conf -n litmus
