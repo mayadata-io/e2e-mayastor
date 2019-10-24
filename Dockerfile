@@ -30,5 +30,7 @@ RUN sudo apt-get update && sudo apt-get install google-cloud-sdk -y
 RUN sudo python2.7 get-pip.py
 # Installing ansible and packet module
 RUN pip install ansible==2.6.1
+RUN pip install google-auth
+RUN pip install requests
 # Installing aws-cli
 RUN pip install --upgrade pip

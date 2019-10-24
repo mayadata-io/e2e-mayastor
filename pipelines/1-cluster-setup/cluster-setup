@@ -2,6 +2,7 @@
 set -e
 
 present_dir=$(pwd)
+echo $present_dir
 
 echo $SDK_TOKEN > key.json
 gcloud auth activate-service-account --key-file=key.json
