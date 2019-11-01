@@ -9,11 +9,16 @@ stages:
   # - APP-CHAOS-TEST
   - CLUSTER-CLEANUP
 
+variables: 
+  utils_path: "/builds/openebs/e2e-mayastor/utils"
+
 # Setup the kubernetes cluster
 
 cluster-setup:
-  image: ranjnshashank855/gke:v1
+  image: ranjnshashank855/gcp-runner:v1
   stage: CLUSTER-SETUP 
+  tags: 
+    - mayastor
   script:
     - chmod 775 ./pipelines/1-cluster-setup/cluster-setup
     - ./pipelines/1-cluster-setup/cluster-setup
@@ -24,18 +29,23 @@ cluster-setup:
 ## Setup OpenEBS control plane
 
 mayastor-deploy:
-  image: openebs/openshift-ci:latest
+  image: ranjnshashank855/gcp-runner:v1
   stage: PROVIDER-INFRA-SETUP
+  tags: 
+    - mayastor
   dependencies:
     - cluster-setup
   script: 
-   - echo "Deploying MayaStor"
+   - chmod 775 ./pipelines/2-providers/mayastor-provision
+   - ./pipelines/2-providers/mayastor-provision
 
 ## Define a job template for app deployers
 
 .app_deploy_template:
   image: openebs/openshift-ci:latest
   stage: APP-FUNC-TEST
+  tags: 
+    - mayastor
   dependencies:
     - cluster-setup
 
@@ -47,8 +57,10 @@ fio-deploy:
 
 cluster-cleanup:
   when: always
-  image: ranjnshashank855/gke:v1
+  image: ranjnshashank855/gcp-runner:v1
   stage: CLUSTER-CLEANUP
+  tags: 
+    - mayastor
   script: 
     - chmod 775 ./pipelines/5-cleanup/cluster-cleanup
     - ./pipelines/5-cleanup/cluster-cleanup

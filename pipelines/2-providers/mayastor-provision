@@ -1,0 +1,39 @@
+#!/bin/bash
+set -x
+
+present_dir=$(pwd)
+echo $present_dir
+
+test_name=$(${utils_path}/generate_test_name testcase=mayastor-provision metadata="")
+
+## Display pipeline info
+echo $CI_PIPELINE_ID; echo $CI_PIPELINE_IID; echo $CI_COMMIT_SHA
+
+${utils_path}/task_delimiter;
+
+
+echo "Setting up test dependencies.."
+${utils_path}/setup_dependencies infra-setup
+
+## Clone the litmus repo, navigate to litmus root 
+git clone https://github.com/mayadata-io/litmus.git
+cd litmus
+
+cat providers/mayastor/run_litmus_test.yml
+cp providers/mayastor/run_litmus_test.yml run_test.yml
+
+echo "Running litmus test for openebs deploy.."
+${utils_path}/litmus_job_runner label='app:mayastor-provision' job=run_test.yml
+${utils_path}/task_delimiter;
+
+
+echo "Dumping state of cluster post job run"; echo ""
+${utils_path}/dump_cluster_state;
+${utils_path}/task_delimiter;
+
+#################
+## GET RESULT  ##
+#################
+
+## Check the test status & result from the litmus result custom resource
+${utils_path}/get_litmus_result ${test_name}

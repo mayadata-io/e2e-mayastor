@@ -6,32 +6,55 @@ echo $present_dir
 
 git clone https://github.com/mayadata-io/litmus.git
 
-cd litmus/k8s/gke/k8s-installer
+cd litmus/k8s/gcp/k8s-installer/
 
 echo $SDK_TOKEN > key.json
 
 gcloud auth activate-service-account --key-file=./key.json
 gcloud config set project openebs-ci
 export GOOGLE_APPLICATION_CREDENTIALS="./key.json"
-export GCP_SERVICE_ACCOUNT_FILE="./key.json"
-export GKEUSER=`echo $GKE_USER`
 
 ls
 
-sed -i -e 's/no_log: True/ /g' create-gke-cluster.yml
+echo "Creating VPC"
+
+ansible-playbook create-vpc.yml --extra-vars "project=openebs-ci" -vv
 
 echo "creating cluster"
-
-ansible-playbook create-gke-cluster.yml -vv
-
+sed -i 's/ubuntu-1604-xenial-v20170202/ubuntu-1804-bionic-v20191021/g' create-k8s-cluster.yml
+ansible-playbook create-k8s-cluster.yml -vv --extra-vars "project=openebs-ci nodes=3 k8s_version=1.14.0"
 
 mkdir $present_dir/.kube
 cat ~/.kube/config > $present_dir/.kube/config
 cat ~/.kube/config > $present_dir/.kube/admin.conf
 cat ~/logs/clusters > $present_dir/.kube/clusters
-cat ~/logs/zone > $present_dir/.kube/zone
+cat ~/logs/vpc > $present_dir/.kube/vpc
+
+echo "****Cluster Availability****"
+set +e
+for i in {1..40}
+do
+  kubectl get nodes
+  if [ "$?" == "0" ]; then
+   break;
+  else
+   sleep 30;
+  fi
+done
+
+set -e
+
+echo "******Checking for the number of nodes in ready state******"
+for i in {1..10}
+do 
+  ready_nodes=$(kubectl get nodes | grep Ready | wc -l)
+  if [ "$ready_nodes" -eq 4 ]; then
+     echo "Number of nodes in ready state is $ready_nodes"
+  else
+    sleep 30;
+  fi
+done
 
 kubectl get nodes
 kubectl apply -f $present_dir/litmus/hack/rbac.yaml
 kubectl apply -f $present_dir/litmus/hack/crds.yaml
-kubectl create configmap kubeconfig --from-file=$present_dir/.kube/admin.conf -n litmus
