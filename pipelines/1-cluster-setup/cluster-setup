@@ -55,6 +55,16 @@ do
   fi
 done
 
+echo "Attching disks to each of then nodes"
+
+echo $SDK_TOKEN > key.json
+
+cd ../gpd-disks
+sed -i 's/us-central1-a/us-east1-b/g' create-gpd.yml
+sed -i 's/20/50/g' create-gpd.yml
+
+ansible-playbook create-gpd.yml --extra-vars "json=key.json email=$service_account_email project=openebs-ci" -vv
+
 kubectl get nodes
 kubectl apply -f $present_dir/litmus/hack/rbac.yaml
 kubectl apply -f $present_dir/litmus/hack/crds.yaml
