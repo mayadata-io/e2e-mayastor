@@ -1,0 +1,53 @@
+#!/bin/bash
+set -x
+
+echo "Setting up test dependencies.."
+${utils_path}/setup_dependencies infra-setup
+
+
+echo "Createting PVC for fio application"
+
+cat <<EOF | kubectl create -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ms-volume-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: mayastor
+EOF
+
+echo "Deploying fio application"
+
+cat <<EOF | kubectl create -f -
+kind: Pod
+apiVersion: v1
+metadata:
+  name: fio
+spec:
+  volumes:
+    - name: ms-volume
+      persistentVolumeClaim:
+       claimName: ms-volume-claim
+  containers:
+    - name: fio
+      image: dmonakhov/alpine-fio
+      args:
+        - sleep
+        - "1000000"
+      volumeMounts:
+        - mountPath: "/volume"
+          name: ms-volume
+EOF
+
+kubectl get pvc 
+
+sleep 10
+
+kubectl get pod
+
+${utils_path}/dump_cluster_state;

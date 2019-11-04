@@ -51,8 +51,10 @@ mayastor-deploy:
 
 fio-deploy:
   extends: .app_deploy_template
-  script: 
-   - echo "Deploying fio using MayaStor"
+  script:
+    - chmod 775 ./pipelines/3-functional/apps/fio-deploy
+    - ./pipelines/3-functional/apps/fio-deploy
+   
 ## Define the app deployer jobs
 
 cluster-cleanup:
