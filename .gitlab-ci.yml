@@ -42,7 +42,7 @@ mayastor-deploy:
 ## Define a job template for app deployers
 
 .app_deploy_template:
-  image: openebs/openshift-ci:latest
+  image: ranjnshashank855/gcp-runner:v1
   stage: APP-FUNC-TEST
   tags: 
     - mayastor
